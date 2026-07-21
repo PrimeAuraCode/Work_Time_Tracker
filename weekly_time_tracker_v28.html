@@ -1,0 +1,48 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Weekly Time Tracker</title><script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script><style>body{background:#0b0c10;color:#fff;font-family:-apple-system,Segoe UI,sans-serif;padding:20px}table{width:80%;margin:auto;table-layout:fixed;border-collapse:collapse;background:#17181c}th,td{border:1px solid #2f3138;padding:8px;text-align:center;vertical-align:middle}th:first-child,td:first-child{width:110px}input{width:58px;text-align:center;background:#2a2d34;color:#fff;border:0;border-radius:8px;padding:6px;font-family:ui-rounded,'SF Pro Rounded','SF Compact Rounded',-apple-system,sans-serif;font-variant-numeric:tabular-nums;font-weight:600;font-size:14px;letter-spacing:0.01em}.pos{color:#30d158}.neg{color:#ff453a}.time-stack{font-family:ui-rounded,'SF Pro Rounded','SF Compact Rounded',-apple-system,sans-serif;font-variant-numeric:tabular-nums;font-weight:600;font-size:14px;letter-spacing:0.01em;white-space:pre}.actions{display:flex;justify-content:space-between;width:80%;margin:15px auto 0}.btn{padding:10px 18px;background:#3a3d45;color:#fff;border:1px solid #4a4d55;border-radius:10px}.btn:hover{background:#4a4d55}.corner-hidden{border:none!important;background:#0b0c10!important;box-shadow:none!important}thead th:nth-child(2){border-left:1px solid #2f3138!important}tbody tr:first-child td:first-child{border-top:1px solid #2f3138!important}.day-head{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.15}.this-week-btn{padding:3px 9px;margin:0 0 5px;font-size:10px;border-radius:7px}</style></head><body><div style="width:80%;margin:0 auto 10px;display:grid;grid-template-columns:110px repeat(5,1fr);align-items:center"><button id='prevWeek' class='btn' style="grid-column:1;justify-self:start;border-radius:50%;width:26px;height:26px;padding:0;font-size:13px;line-height:1">‹</button><button id='thisWeek' class='btn' style="grid-column:2;justify-self:center;padding:4px 12px;font-size:11px;border-radius:8px">This week</button><h2 style='grid-column:3 / 6;grid-row:1;margin:0;text-align:center'>Weekly Time Tracker</h2><button id='nextWeek' class='btn' style="grid-column:6;grid-row:1;justify-self:end;border-radius:50%;width:26px;height:26px;padding:0;font-size:13px;line-height:1">›</button></div><table id='tbl'><thead><tr><th class='corner-hidden'></th><th id='a0'></th><th id='a1'></th><th id='a2'></th><th id='a3'></th><th id='a4'></th></tr></thead><tbody><tr><td>Clock In</td></tr><tr><td>Lunch Out</td></tr><tr><td>Lunch In</td></tr><tr><td>Clock Out</td></tr><tr><td>Daily Balance</td></tr><tr><td>Progress</td></tr></tbody></table><div class='actions'><button class='btn' onclick='fillTheoretical()'>Fill with Theoretical Hours</button><button class='btn' onclick='saveFile()'>Save to Excel</button></div><script>const days=['Mo','Tu','We','Th','Fr'];const b=document.querySelector('tbody');for(let r=0;r<4;r++){for(let d=0;d<5;d++){let td=document.createElement('td');td.innerHTML='<input>';b.rows[r].appendChild(td)}}for(let r=4;r<6;r++){for(let d=0;d<5;d++)b.rows[r].appendChild(document.createElement('td'))}let m=new Date();m.setDate(m.getDate()-((m.getDay()+6)%7));let weekOffset=0;const STORAGE_KEY='wttWeeksData';const OFFSET_KEY='wttWeekOffset';let weeksData=(window.__PRESET_WEEKS_DATA__||{});try{weeksData=JSON.parse(localStorage.getItem(STORAGE_KEY))||weeksData}catch(e){}function persist(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(weeksData))}catch(e){}}function mondayFor(off){let d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7)+off*7);return d}function weekKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}function saveCurrentWeek(){const key=weekKey(mondayFor(weekOffset));const vals=[];for(let r=0;r<4;r++){const row=[];for(let c=0;c<5;c++)row.push(b.rows[r].cells[c+1].firstChild.value);vals.push(row)}weeksData[key]=vals;persist()}function loadWeek(off){weekOffset=off;try{localStorage.setItem(OFFSET_KEY,String(off))}catch(e){}const mon=mondayFor(weekOffset);const key=weekKey(mon);const vals=weeksData[key];for(let i=0;i<5;i++){let d=new Date(mon);d.setDate(mon.getDate()+i);document.getElementById('a'+i).innerHTML="<div class='day-head'><span>"+days[i]+"</span><small>"+d.getDate()+'-'+d.toLocaleString('en',{month:'long'}).toLowerCase()+"</small></div>"}for(let r=0;r<4;r++)for(let c=0;c<5;c++)b.rows[r].cells[c+1].firstChild.value=vals?vals[r][c]:'';calc()}function commitInputs(){document.querySelectorAll('input').forEach(i=>{i.value=norm(i.value)})}document.getElementById('prevWeek').addEventListener('click',()=>{commitInputs();calc();loadWeek(weekOffset-1)});document.getElementById('nextWeek').addEventListener('click',()=>{commitInputs();calc();loadWeek(weekOffset+1)});document.addEventListener('click',e=>{if(e.target&&e.target.id==='thisWeek'){commitInputs();calc();loadWeek(0)}});function norm(v){v=(v||'').replace(/\D/g,'');if(!v)return'';let h,m;if(v.length<=2){h=+v;m=0}else if(v.length===3){h=+v[0];m=+v.slice(1)}else{h=+v.slice(0,-2);m=+v.slice(-2)}return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')}function mins(t,pm=false){if(!t)return null;let[a,b]=t.split(':').map(Number);if(pm&&a<12)a+=12;return a*60+b}function hm(hours){let m=Math.round(hours*60);m=Math.abs(m);let h=Math.floor(m/60);let mm=m%60;return String(h).padStart(2,'0')+':'+String(mm).padStart(2,'0')}function hmv(hours){let m=Math.round(hours*60);m=Math.abs(m);let h=Math.floor(m/60);let mm=m%60;return String(h).padStart(2,'0')+':'+String(mm).padStart(2,'0')}document.querySelectorAll('input').forEach(i=>i.addEventListener('change',e=>{e.target.value=norm(e.target.value);calc()}));function calc(){saveCurrentWeek();let cum=0;for(let c=0;c<5;c++){let ci=mins(b.rows[0].cells[c+1].firstChild.value,false);let lo=mins(b.rows[1].cells[c+1].firstChild.value,true);let li=mins(b.rows[2].cells[c+1].firstChild.value,true);let co=mins(b.rows[3].cells[c+1].firstChild.value,true);let h=0;if(ci!=null&&co!=null){if(lo!=null&&li!=null){h=((lo-ci)+(co-li))/60;}else{h=(co-ci)/60;}}cum+=h;let bal=h-7;b.rows[4].cells[c+1].innerHTML=h?`<div class='time-stack'>${hmv(h)}<br><span class='${bal>=0?'pos':'neg'}'>${hm(bal)}</span></div>`:'';let prog=cum-((c+1)*7);b.rows[5].cells[c+1].innerHTML=`<div class='time-stack'>${hmv(cum)}<br><span class='${prog>=0?'pos':'neg'}'>${hm(prog)}</span></div>`;}}function fillTheoretical(){for(let c=1;c<=5;c++){b.rows[0].cells[c].firstChild.value='09:00';b.rows[1].cells[c].firstChild.value='';b.rows[2].cells[c].firstChild.value='';b.rows[3].cells[c].firstChild.value='04:00';}calc()}document.querySelectorAll('input').forEach((inp)=>{inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const inputs=[...document.querySelectorAll('input')];const idx=inputs.indexOf(e.target);const col=idx%5;const row=Math.floor(idx/5);if(e.shiftKey){if(row>0){const n=(row-1)*5+col;inputs[n].focus();inputs[n].select();}}else{if(row<3){const n=(row+1)*5+col;inputs[n].focus();inputs[n].select();}else if(col<4){const n=col+1;inputs[n].focus();inputs[n].select();}else{e.target.blur();}}}});});let startOffset=(typeof window.__PRESET_OFFSET__==='number'?window.__PRESET_OFFSET__:0);try{const so=parseInt(localStorage.getItem(OFFSET_KEY),10);if(!isNaN(so))startOffset=so}catch(e){}const hadData=!!weeksData[weekKey(mondayFor(startOffset))];loadWeek(startOffset);if(!hadData)fillTheoretical();let excelFileHandle=null;
+function excelRows(){
+  const mon=mondayFor(weekOffset);
+  const headers=['Field'];
+  for(let c=0;c<5;c++){
+    const d=new Date(mon);d.setDate(mon.getDate()+c);
+    headers.push(days[c]+' '+d.getDate()+'-'+d.toLocaleString('en',{month:'long'}).toLowerCase());
+  }
+  const labels=['Clock In','Lunch Out','Lunch In','Clock Out','Daily Balance','Progress'];
+  const rows=[headers];
+  for(let r=0;r<6;r++){
+    const row=[labels[r]];
+    for(let c=0;c<5;c++){
+      if(r<4) row.push(b.rows[r].cells[c+1].firstChild.value);
+      else row.push(b.rows[r].cells[c+1].innerText.replace(/\n/g,' '));
+    }
+    rows.push(row);
+  }
+  return rows;
+}
+async function saveFile(){
+  commitInputs();calc();
+  if(typeof XLSX==='undefined'){
+    alert('Excel export is unavailable. Check your internet connection and try again.');
+    return;
+  }
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet(excelRows());
+  ws['!cols']=[{wch:16},{wch:16},{wch:16},{wch:16},{wch:16},{wch:16}];
+  XLSX.utils.book_append_sheet(wb,ws,'Weekly Time Tracker');
+  const data=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+  const blob=new Blob([data],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  try{
+    if('showSaveFilePicker' in window){
+      if(!excelFileHandle){
+        excelFileHandle=await window.showSaveFilePicker({suggestedName:'weekly_time_tracker.xlsx',types:[{description:'Excel workbook',accept:{'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':['.xlsx']}}]});
+      }
+      const writable=await excelFileHandle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+    }else{
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');a.href=url;a.download='weekly_time_tracker.xlsx';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+    }
+  }catch(e){
+    if(e&&e.name!=='AbortError') alert('The Excel file could not be saved.');
+  }
+}</script></body></html>

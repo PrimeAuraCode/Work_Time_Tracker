@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Time Tracker</title>
+  
+  <!-- Apple Mobile Web App Capable -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#000000">
+
+  <!-- Inter / System Font Stack -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      /* Steve Jobs Minimalist Monochrome iOS Dark Palette */
+      --bg-main: #000000;
+      --bg-card: #1c1c1e;
+      --bg-card-hover: #2c2c2e;
+      --bg-input: #121214;
+      --accent: #ffffff;
+      --accent-muted: #8e8e93;
+      --accent-green: #30d158;
+      --accent-red: #ff453a;
+      --accent-orange: #ff9f0a;
+      --border-color: #2c2c2e;
+      --text-main: #ffffff;
+      --text-muted: #8e8e93;
+      --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      --radius-lg: 16px;
+      --radius-md: 10px;
+      --radius-sm: 6px;
+      --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.6);
+    }
+
+    [data-theme="light"] {
+      --bg-main: #f2f2f7;
+      --bg-card: #ffffff;
+      --bg-card-hover: #e5e5ea;
+      --bg-input: #f2f2f7;
+      --accent: #000000;
+      --accent-muted: #6c6c70;
+      --accent-green: #28cd41;
+      --accent-red: #ff3b30;
+      --accent-orange: #ff9500;
+      --border-color: #d1d1d6;
+      --text-main: #000000;
+      --text-muted: #6c6c70;
+      --shadow-soft: 0 4px 16px rgba(0, 0, 0, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: var(--font-stack);
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding-bottom: 90px;
+      line-height: 1.4;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-top: env(safe-area-inset-top);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      background: var(--text-main);
+      color: var(--bg-main);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 18px;
+      letter-spacing: -0.5px;
+    }
+
+    .brand-title {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .icon-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.2s ease;
+    }
+
+    .icon-btn:disabled {
+      opacity: 0.3;
+      cursor: default;
+    }
+
+    .icon-btn:not(:disabled):active {
+      transform: scale(0.95);
+      background: var(--bg-card-hover);
+    }
+
+    /* Controls Bar */
+    .controls-bar {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow-soft);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .regime-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .regime-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .week-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .week-label {
+      font-weight: 600;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .btn {
+      background: var(--bg-card-hover);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary {
+      background: var(--text-main);
+      color: var(--bg-main);
+      border: none;
+    }
+
+    .btn-primary:active {
+      opacity: 0.85;
+    }
+
+    .btn-sm {
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+
+    /* Tabs */
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(3px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      letter-spacing: -0.3px;
+    }
+
+    /* Main Weekly Table Grid */
+    .table-wrapper {
+      overflow-x: auto;
+      margin: 0 -16px;
+      padding: 0 16px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .weekly-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 13px;
+    }
+
+    .weekly-table th, .weekly-table td {
+      border-bottom: 1px solid var(--border-color);
+      padding: 6px 2px;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    .weekly-table th:first-child,
+    .weekly-table td:first-child {
+      text-align: left;
+      font-weight: 700;
+      color: var(--text-muted);
+      width: 76px;
+      max-width: 78px;
+      min-width: 70px;
+      padding-left: 6px;
+      background: var(--bg-card);
+      position: sticky;
+      left: 0;
+      z-index: 2;
+      font-size: 12px;
+    }
+
+    .weekly-table th {
+      background: var(--bg-card-hover);
+      color: var(--text-main);
+      font-weight: 700;
+      padding: 10px 4px;
+    }
+
+    .day-header-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .day-abbr {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .day-date {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    /* Direct 1st Click Editable Input Cells */
+    .cell-input {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      text-align: center;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 2px;
+      border-radius: var(--radius-sm);
+      outline: none;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .cell-input:focus {
+      background: #000000;
+      border-color: var(--text-main);
+      box-shadow: 0 0 0 1px var(--text-main);
+    }
+
+    .total-cell-wrapper, .accum-cell-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .main-val {
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .theo-subval {
+      font-size: 10px;
+      font-weight: 600;
+      margin-top: 1px;
+      display: block;
+      white-space: nowrap;
+    }
+
+    .variance-negative { color: var(--accent-red); }
+    .variance-positive { color: var(--accent-green); }
+    .variance-neutral { color: var(--text-muted); }
+
+    .total-row td {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .accumulated-row td {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    /* Form & Panel Inputs */
+    .calc-panel-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .input-group label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-control {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 8px 10px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      outline: none;
+      width: 100%;
+      font-family: inherit;
+    }
+
+    .form-control:focus {
+      border-color: var(--text-main);
+    }
+
+    /* Logs & Lists */
+    .log-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .log-item:last-child {
+      border-bottom: none;
+    }
+
+    .log-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .log-title {
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .log-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .log-value {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--text-main);
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .stat-val {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.5px;
+    }
+
+    .stat-lbl {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* Bottom Navigation Bar */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(28, 28, 30, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-space-around;
+      padding: 8px 0 env(safe-area-inset-bottom);
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      color: var(--text-muted);
+      font-size: 10px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      width: 25%;
+    }
+
+    .nav-icon {
+      font-size: 18px;
+    }
+
+    .nav-item.active {
+      color: var(--text-main);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Header with Undo / Redo buttons -->
+    <header>
+      <div class="brand">
+        <div class="brand-logo">T</div>
+        <div>
+          <h1 class="brand-title">Time Tracker</h1>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" id="undoBtn" title="Undo (Ctrl+Z)" disabled>↩️</button>
+        <button class="icon-btn" id="redoBtn" title="Redo (Ctrl+Y / Ctrl+I)" disabled>↪️</button>
+        <button class="icon-btn" id="themeToggleBtn" title="Toggle Theme">🌙</button>
+        <button class="icon-btn" id="exportBtn" title="Export Backup">📥</button>
+      </div>
+    </header>
+
+    <!-- Controls Bar -->
+    <div class="controls-bar">
+      <div class="regime-row">
+        <div>
+          <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Regime: </span>
+          <span class="regime-badge" id="regimeBadge">🌴 Summer (35h/wk - 7h/day)</span>
+        </div>
+        <button class="btn btn-sm" id="presetScheduleBtn">⚡ Apply Default Week</button>
+      </div>
+      
+      <div class="week-nav">
+        <button class="btn btn-sm" id="prevWeekBtn">❮ Prev</button>
+        <span class="week-label" id="weekDateRangeLabel">Jul 13 - Jul 17, 2026</span>
+        <button class="btn btn-sm" id="nextWeekBtn">Next ❯</button>
+      </div>
+    </div>
+
+
+    <!-- TAB 1: SLEEP LOG (1st Tab) -->
+    <div id="tab-sleep" class="tab-content">
+      <div class="card">
+        <div class="card-title">
+          <span>🌙 Sleep Hours Log</span>
+        </div>
+        <div class="calc-panel-grid">
+          <div class="input-group">
+            <label>Date</label>
+            <input type="date" class="form-control" id="sleepDateInput">
+          </div>
+          <div class="input-group">
+            <label>Bedtime</label>
+            <input type="text" class="form-control" id="sleepBedtimeInput" value="11:00 PM" placeholder="11:00 PM">
+          </div>
+          <div class="input-group">
+            <label>Wake Time</label>
+            <input type="text" class="form-control" id="sleepWakeInput" value="07:00 AM" placeholder="07:00 AM">
+          </div>
+          <div class="input-group">
+            <label>Quality</label>
+            <select class="form-control" id="sleepQualityInput">
+              <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+              <option value="4" selected>⭐⭐⭐⭐ Good</option>
+              <option value="3">⭐⭐⭐ Average</option>
+              <option value="2">⭐⭐ Poor</option>
+              <option value="1">⭐ Restless</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-top: 14px;">
+          <button class="btn btn-primary" id="saveSleepBtn" style="width: 100%;">Log Sleep Entry</button>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-val" id="sleepAvgWeekly">7.5h</div>
+          <div class="stat-lbl">7-Day Sleep Avg</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="sleepQualityAvg">4.2★</div>
+          <div class="stat-lbl">Avg Quality</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <span>📜 Recent Sleep History</span>
+        </div>
+        <div id="sleepLogList"></div>
+      </div>
+    </div>
+
+
+    <!-- TAB 2: WORK HOURS (2nd Tab - Direct 1-Click Editing Grid) -->
+    <div id="tab-work" class="tab-content active">
+      
+      <div class="card">
+        <div class="card-title">
+          <span>📅 Weekly Work Sheet</span>
+          <span style="font-size: 11px; color: var(--text-muted);">Format: 12-Hour (e.g. 9:00 AM, 4:00 PM)</span>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="weekly-table" id="weeklyGridTable">
+            <thead>
+              <tr>
+                <th>Hours</th>
+                <th>
+                  <div class="day-header-cell">
+                    <span class="day-abbr">Mo</span>
+                    <span class="day-date" id="date-Mo">13-Jul</span>
+                  </div>
+                </th>
+                <th>
+                  <div class="day-header-cell">
+                    <span class="day-abbr">Tu</span>
+                    <span class="day-date" id="date-Tu">14-Jul</span>
+                  </div>
+                </th>
+                <th>
+                  <div class="day-header-cell">
+                    <span class="day-abbr">We</span>
+                    <span class="day-date" id="date-We">15-Jul</span>
+                  </div>
+                </th>
+                <th>
+                  <div class="day-header-cell">
+                    <span class="day-abbr">Th</span>
+                    <span class="day-date" id="date-Th">16-Jul</span>
+                  </div>
+                </th>
+                <th>
+                  <div class="day-header-cell">
+                    <span class="day-abbr">Fr</span>
+                    <span class="day-date" id="date-Fr">17-Jul</span>
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Entry</td>
+                <td><input class="cell-input" id="cell-Mo-entry" placeholder="9:00 AM"></td>
+                <td><input class="cell-input" id="cell-Tu-entry" placeholder="9:00 AM"></td>
+                <td><input class="cell-input" id="cell-We-entry" placeholder="9:00 AM"></td>
+                <td><input class="cell-input" id="cell-Th-entry" placeholder="9:00 AM"></td>
+                <td><input class="cell-input" id="cell-Fr-entry" placeholder="9:00 AM"></td>
+              </tr>
+              <tr>
+                <td>Lunch In</td>
+                <td><input class="cell-input" id="cell-Mo-lunchIn" placeholder="-"></td>
+                <td><input class="cell-input" id="cell-Tu-lunchIn" placeholder="-"></td>
+                <td><input class="cell-input" id="cell-We-lunchIn" placeholder="-"></td>
+                <td><input class="cell-input" id="cell-Th-lunchIn" placeholder="-"></td>
+                <td><input class="cell-input" id="cell-Fr-lunchIn" placeholder="-"></td>
+              </tr>
+              <tr>
+                <td>Lunch Out</td>
+                <td><input class="cell-input" id="cell-Mo-lunchOut" placeholder="-"></td>
+                <td><input class="cell-input" id="cell-Tu-lunchOut" placeholder="-"></td>
+                <td><input class="cell-input" id="cell-We-lunchOut" placeholder="-"></td>
+                <td><input class="cell-input" id="cell-Th-lunchOut" placeholder="-"></td>
+                <td><input class="cell-input" id="cell-Fr-lunchOut" placeholder="-"></td>
+              </tr>
+              <tr>
+                <td>Exit</td>
+                <td><input class="cell-input" id="cell-Mo-exit" placeholder="4:00 PM"></td>
+                <td><input class="cell-input" id="cell-Tu-exit" placeholder="4:00 PM"></td>
+                <td><input class="cell-input" id="cell-We-exit" placeholder="4:00 PM"></td>
+                <td><input class="cell-input" id="cell-Th-exit" placeholder="4:00 PM"></td>
+                <td><input class="cell-input" id="cell-Fr-exit" placeholder="4:00 PM"></td>
+              </tr>
+              <tr class="total-row">
+                <td>Total</td>
+                <td id="cell-Mo-total">-</td>
+                <td id="cell-Tu-total">-</td>
+                <td id="cell-We-total">-</td>
+                <td id="cell-Th-total">-</td>
+                <td id="cell-Fr-total">-</td>
+              </tr>
+              <tr class="accumulated-row">
+                <td>Accumulated</td>
+                <td id="cell-Mo-accum">-</td>
+                <td id="cell-Tu-accum">-</td>
+                <td id="cell-We-accum">-</td>
+                <td id="cell-Th-accum">-</td>
+                <td id="cell-Fr-accum">-</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- TAB 3: PERSONAL TIME LOG (3rd Tab) -->
+    <div id="tab-personal" class="tab-content">
+      <div class="card">
+        <div class="card-title">
+          <span>🎨 Personal Time Log</span>
+        </div>
+        <div class="calc-panel-grid">
+          <div class="input-group">
+            <label>Category</label>
+            <select class="form-control" id="personalCatInput">
+              <option value="Reading">📚 Reading</option>
+              <option value="Exercise">🏃 Exercise / Sport</option>
+              <option value="Hobbies">🎸 Hobbies & Creative</option>
+              <option value="Family">👨‍👩‍👧 Family & Social</option>
+              <option value="Learning">💡 Learning / Courses</option>
+              <option value="Rest">🧘 Rest & Meditation</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label>Duration (Min)</label>
+            <input type="number" class="form-control" id="personalDurationInput" value="45" min="5" step="5">
+          </div>
+          <div class="input-group">
+            <label>Date</label>
+            <input type="date" class="form-control" id="personalDateInput">
+          </div>
+          <div class="input-group">
+            <label>Notes</label>
+            <input type="text" class="form-control" id="personalNotesInput" placeholder="Activity notes">
+          </div>
+        </div>
+        <div style="margin-top: 14px;">
+          <button class="btn btn-primary" id="savePersonalBtn" style="width: 100%;">Log Personal Time</button>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-val" id="personalTotalWeekly">5h 30m</div>
+          <div class="stat-lbl">This Week Personal</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="personalTopCat">Reading</div>
+          <div class="stat-lbl">Top Activity</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <span>📜 Personal Time History</span>
+        </div>
+        <div id="personalLogList"></div>
+      </div>
+    </div>
+
+
+    <!-- TAB 4: MONTHLY & STATS (4th Tab) -->
+    <div id="tab-monthly" class="tab-content">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-val" id="monthlyTotalWorked">0:00</div>
+          <div class="stat-lbl">Worked This Month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="monthlyFlexBalance" style="color: var(--accent-green);">+0:00</div>
+          <div class="stat-lbl">Flexometer Net Balance</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <span>📊 Flex-Time Balance Meter</span>
+        </div>
+        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
+          Accumulated work hours vs theoretical target hours balance:
+        </div>
+        <div style="background: var(--bg-input); height: 14px; border-radius: 7px; overflow: hidden; position: relative; border: 1px solid var(--border-color);">
+          <div id="flexMeterBar" style="background: var(--text-main); height: 100%; width: 50%;"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 11px; margin-top: 6px; color: var(--text-muted);">
+          <span>Theoretical: <strong id="monthlyTheoTarget">140:00h</strong></span>
+          <span>Actual: <strong id="monthlyActualTotal">140:00h</strong></span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <span>💾 Data Options</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <button class="btn" id="downloadBackupBtn">📥 Download JSON Backup</button>
+          <button class="btn" id="downloadCSVBtn">📊 Export Work CSV</button>
+          <label class="btn" style="text-align: center; cursor: pointer;">
+            📤 Restore JSON Backup
+            <input type="file" id="importFileInput" accept=".json" style="display: none;">
+          </label>
+          <button class="btn" id="clearAllDataBtn" style="color: var(--accent-red); border-color: var(--accent-red);">⚠️ Reset All Data</button>
+        </div>
+      </div>
+    </div>
+
+  </div> <!-- End App Container -->
+
+
+  <!-- Bottom Navigation Bar -->
+  <nav class="bottom-nav">
+    <div class="nav-item" data-tab="tab-sleep">
+      <span class="nav-icon">🌙</span>
+      <span>Sleep</span>
+    </div>
+    <div class="nav-item active" data-tab="tab-work">
+      <span class="nav-icon">💼</span>
+      <span>Work</span>
+    </div>
+    <div class="nav-item" data-tab="tab-personal">
+      <span class="nav-icon">🎨</span>
+      <span>Personal</span>
+    </div>
+    <div class="nav-item" data-tab="tab-monthly">
+      <span class="nav-icon">📊</span>
+      <span>Monthly</span>
+    </div>
+  </nav>
+
+
+  <!-- JAVASCRIPT APPLICATION CODE -->
+  <script>
+    const STORAGE_KEY = 'TIME_TRACKER_V6';
+
+    let appData = {
+      theme: 'dark',
+      currentWeekDate: getStartOfWeek(new Date()),
+      regimes: {
+        summer: { name: 'Summer (35h/wk - 7h/day)', weeklyTarget: 2100, daily: { Mo: 420, Tu: 420, We: 420, Th: 420, Fr: 420 } },
+        winter: { name: 'Winter (37.5h/wk - 7.5h/day)', weeklyTarget: 2250, daily: { Mo: 450, Tu: 450, We: 450, Th: 450, Fr: 450 } }
+      },
+      currentRegime: 'summer',
+      workData: {},
+      sleepData: [],
+      personalData: []
+    };
+
+    const DAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr'];
+
+    // --- UNDO / REDO HISTORY ENGINE ---
+    const historyStack = [];
+    const redoStack = [];
+    const MAX_HISTORY = 50;
+
+    function recordStateSnapshot() {
+      historyStack.push(JSON.stringify(appData));
+      if (historyStack.length > MAX_HISTORY) historyStack.shift();
+      redoStack.length = 0; // Clear redo history on new action
+      updateUndoRedoButtons();
+    }
+
+    function undo() {
+      if (historyStack.length === 0) return;
+      redoStack.push(JSON.stringify(appData));
+      const previousState = JSON.parse(historyStack.pop());
+      appData = previousState;
+      if (typeof appData.currentWeekDate === 'string') {
+        appData.currentWeekDate = new Date(appData.currentWeekDate);
+      }
+      saveStorage(false);
+      renderWeeklyGrid();
+      renderSleepLogs();
+      renderPersonalLogs();
+      updateUndoRedoButtons();
+    }
+
+    function redo() {
+      if (redoStack.length === 0) return;
+      historyStack.push(JSON.stringify(appData));
+      const nextState = JSON.parse(redoStack.pop());
+      appData = nextState;
+      if (typeof appData.currentWeekDate === 'string') {
+        appData.currentWeekDate = new Date(appData.currentWeekDate);
+      }
+      saveStorage(false);
+      renderWeeklyGrid();
+      renderSleepLogs();
+      renderPersonalLogs();
+      updateUndoRedoButtons();
+    }
+
+    function updateUndoRedoButtons() {
+      document.getElementById('undoBtn').disabled = historyStack.length === 0;
+      document.getElementById('redoBtn').disabled = redoStack.length === 0;
+    }
+
+    function bindKeyboardShortcuts() {
+      window.addEventListener('keydown', (e) => {
+        const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+        const ctrlKey = isMac ? e.metaKey : e.ctrlKey;
+
+        if (ctrlKey && !e.altKey) {
+          // Ctrl+Z / Cmd+Z -> Undo
+          if (e.key.toLowerCase() === 'z' && !e.shiftKey) {
+            e.preventDefault();
+            undo();
+          }
+          // Ctrl+Shift+Z / Ctrl+Y / Ctrl+I -> Redo
+          else if ((e.key.toLowerCase() === 'z' && e.shiftKey) || e.key.toLowerCase() === 'y' || e.key.toLowerCase() === 'i') {
+            e.preventDefault();
+            redo();
+          }
+        }
+      });
+
+      document.getElementById('undoBtn').addEventListener('click', undo);
+      document.getElementById('redoBtn').addEventListener('click', redo);
+    }
+
+
+    // --- STORAGE MANAGEMENT ---
+    function loadStorage() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          appData = { ...appData, ...JSON.parse(saved) };
+        } catch (e) {
+          console.error("Error loading storage", e);
+        }
+      }
+      if (typeof appData.currentWeekDate === 'string') {
+        appData.currentWeekDate = new Date(appData.currentWeekDate);
+      }
+      applyTheme(appData.theme || 'dark');
+      autoDetectRegime();
+    }
+
+    function saveStorage(recordHistory = true) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+    }
+
+    function getStartOfWeek(d) {
+      const date = new Date(d);
+      const day = date.getDay();
+      const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+      const monday = new Date(date.setDate(diff));
+      monday.setHours(0,0,0,0);
+      return monday;
+    }
+
+    function formatISODate(d) {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function parseTimeToMinutes(timeStr) {
+      if (!timeStr || typeof timeStr !== 'string') return 0;
+      let s = timeStr.trim().toUpperCase();
+
+      const isPM = s.includes('PM');
+      const isAM = s.includes('AM');
+
+      s = s.replace('AM', '').replace('PM', '').trim();
+      const parts = s.split(':');
+      if (parts.length < 1 || !parts[0]) return 0;
+
+      let h = parseInt(parts[0], 10) || 0;
+      let m = parts[1] ? (parseInt(parts[1], 10) || 0) : 0;
+
+      if (isPM && h < 12) h += 12;
+      if (isAM && h === 12) h = 0;
+
+      if (!isAM && !isPM && h >= 1 && h <= 7) {
+        h += 12;
+      }
+
+      return h * 60 + m;
+    }
+
+    function formatMinutesTo12H(totalMin) {
+      if (isNaN(totalMin) || totalMin <= 0) return '';
+      let h = Math.floor(totalMin / 60) % 24;
+      const m = totalMin % 60;
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      h = h % 12;
+      if (h === 0) h = 12;
+      const strM = String(m).padStart(2, '0');
+      return `${h}:${strM} ${ampm}`;
+    }
+
+    function formatMinutesToHHMM(totalMin, showPlusSign = false) {
+      if (isNaN(totalMin)) return "0:00";
+      const isNeg = totalMin < 0;
+      const absMin = Math.abs(totalMin);
+      const h = Math.floor(absMin / 60);
+      const m = absMin % 60;
+      const strM = String(m).padStart(2, '0');
+      let sign = '';
+      if (isNeg) sign = '-';
+      else if (showPlusSign && totalMin > 0) sign = '+';
+      return `${sign}${h}:${strM}`;
+    }
+
+    function addDays(date, days) {
+      const result = new Date(date);
+      result.setDate(result.getDate() + days);
+      return result;
+    }
+
+    function formatDateShort(d) {
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      return `${d.getDate()}-${monthNames[d.getMonth()]}`;
+    }
+
+    function autoDetectRegime() {
+      const month = appData.currentWeekDate.getMonth();
+      if (month >= 5 && month <= 8) {
+        appData.currentRegime = 'summer';
+      } else {
+        appData.currentRegime = 'winter';
+      }
+      updateRegimeUI();
+    }
+
+    function updateRegimeUI() {
+      const badge = document.getElementById('regimeBadge');
+      if (appData.currentRegime === 'summer') {
+        badge.innerHTML = '🌴 Summer (35h/wk - 7h/day)';
+      } else {
+        badge.innerHTML = '❄️ Winter (37.5h/wk - 7.5h/day)';
+      }
+    }
+
+    function getWeekKey(startDate = appData.currentWeekDate) {
+      return formatISODate(startDate);
+    }
+
+    function getCurrentWeekData() {
+      const key = getWeekKey();
+      if (!appData.workData[key]) {
+        const isSummer = appData.currentRegime === 'summer';
+        const exitDefault = isSummer ? '4:00 PM' : '4:30 PM';
+
+        appData.workData[key] = {
+          Mo: { entry: '9:00 AM', lunchIn: '', lunchOut: '', exit: exitDefault },
+          Tu: { entry: '9:00 AM', lunchIn: '', lunchOut: '', exit: exitDefault },
+          We: { entry: '9:00 AM', lunchIn: '', lunchOut: '', exit: exitDefault },
+          Th: { entry: '9:00 AM', lunchIn: '', lunchOut: '', exit: exitDefault },
+          Fr: { entry: '9:00 AM', lunchIn: '', lunchOut: '', exit: exitDefault }
+        };
+      }
+      return appData.workData[key];
+    }
+
+    function calculateDayWorkedMinutes(dayObj) {
+      if (!dayObj || !dayObj.entry || !dayObj.exit) return 0;
+      const entryMin = parseTimeToMinutes(dayObj.entry);
+      const exitMin = parseTimeToMinutes(dayObj.exit);
+      if (exitMin <= entryMin) return 0;
+
+      let rawDuration = exitMin - entryMin;
+      if (dayObj.lunchIn && dayObj.lunchOut) {
+        const lunchInMin = parseTimeToMinutes(dayObj.lunchIn);
+        const lunchOutMin = parseTimeToMinutes(dayObj.lunchOut);
+        if (lunchOutMin > lunchInMin) {
+          rawDuration -= (lunchOutMin - lunchInMin);
+        }
+      }
+      return Math.max(0, rawDuration);
+    }
+
+    function applyPresetSchedule() {
+      recordStateSnapshot();
+      const weekData = getCurrentWeekData();
+      const isSummer = appData.currentRegime === 'summer';
+      const exitDefault = isSummer ? '4:00 PM' : '4:30 PM';
+
+      DAYS.forEach(day => {
+        weekData[day] = { entry: '9:00 AM', lunchIn: '', lunchOut: '', exit: exitDefault };
+      });
+
+      saveStorage();
+      renderWeeklyGrid();
+    }
+
+
+    // --- WEEKLY GRID RENDER ---
+    function renderWeeklyGrid() {
+      const startDate = appData.currentWeekDate;
+      const weekData = getCurrentWeekData();
+      const regime = appData.regimes[appData.currentRegime];
+
+      const endDate = addDays(startDate, 4);
+      document.getElementById('weekDateRangeLabel').innerText = 
+        `${formatDateShort(startDate)} - ${formatDateShort(endDate)}, ${startDate.getFullYear()}`;
+
+      DAYS.forEach((day, index) => {
+        const dayDate = addDays(startDate, index);
+        document.getElementById(`date-${day}`).innerText = formatDateShort(dayDate);
+      });
+
+      let runningAccumulatedMin = 0;
+      let runningTheoreticalMin = 0;
+
+      DAYS.forEach((day) => {
+        const dObj = weekData[day] || { entry: '', lunchIn: '', lunchOut: '', exit: '' };
+
+        document.getElementById(`cell-${day}-entry`).value = dObj.entry || '';
+        document.getElementById(`cell-${day}-lunchIn`).value = dObj.lunchIn || '';
+        document.getElementById(`cell-${day}-lunchOut`).value = dObj.lunchOut || '';
+        document.getElementById(`cell-${day}-exit`).value = dObj.exit || '';
+
+        const workedMin = calculateDayWorkedMinutes(dObj);
+        const dayTheoMin = regime.daily[day] || (appData.currentRegime === 'summer' ? 420 : 450);
+        const dayVarianceMin = workedMin - dayTheoMin;
+
+        let dayVarianceClass = 'variance-neutral';
+        if (workedMin > 0) {
+          if (dayVarianceMin >= 0) dayVarianceClass = 'variance-positive';
+          else dayVarianceClass = 'variance-negative';
+        }
+
+        const totalCellHtml = workedMin > 0 ? `
+          <div class="total-cell-wrapper">
+            <span class="main-val">${formatMinutesToHHMM(workedMin)}</span>
+            <span class="theo-subval ${dayVarianceClass}">(T: ${formatMinutesToHHMM(dayTheoMin)} | ${formatMinutesToHHMM(dayVarianceMin, true)})</span>
+          </div>
+        ` : '-';
+        document.getElementById(`cell-${day}-total`).innerHTML = totalCellHtml;
+
+        runningAccumulatedMin += workedMin;
+        runningTheoreticalMin += dayTheoMin;
+
+        const accumVarianceMin = runningAccumulatedMin - runningTheoreticalMin;
+        let accumVarianceClass = 'variance-neutral';
+        if (runningAccumulatedMin > 0) {
+          if (accumVarianceMin >= 0) accumVarianceClass = 'variance-positive';
+          else accumVarianceClass = 'variance-negative';
+        }
+
+        const accumCellHtml = runningAccumulatedMin > 0 ? `
+          <div class="accum-cell-wrapper">
+            <span class="main-val">${formatMinutesToHHMM(runningAccumulatedMin)}</span>
+            <span class="theo-subval ${accumVarianceClass}">(T: ${formatMinutesToHHMM(runningTheoreticalMin)} | ${formatMinutesToHHMM(accumVarianceMin, true)})</span>
+          </div>
+        ` : '-';
+        document.getElementById(`cell-${day}-accum`).innerHTML = accumCellHtml;
+      });
+
+      renderMonthlySummary();
+    }
+
+
+    // --- SLEEP TRACKER LOGIC ---
+    function bindSleepEvents() {
+      document.getElementById('sleepDateInput').value = formatISODate(new Date());
+
+      document.getElementById('saveSleepBtn').addEventListener('click', () => {
+        recordStateSnapshot();
+        const date = document.getElementById('sleepDateInput').value;
+        const bedtime = document.getElementById('sleepBedtimeInput').value;
+        const wakeTime = document.getElementById('sleepWakeInput').value;
+        const quality = parseInt(document.getElementById('sleepQualityInput').value, 10);
+
+        let durationMin = 480;
+        if (bedtime && wakeTime) {
+          const bedM = parseTimeToMinutes(bedtime);
+          const wakeM = parseTimeToMinutes(wakeTime);
+          durationMin = wakeM >= bedM ? (wakeM - bedM) : (1440 - bedM + wakeM);
+        }
+
+        appData.sleepData.unshift({ id: Date.now(), date, bedtime, wakeTime, quality, durationMin });
+        saveStorage();
+        renderSleepLogs();
+      });
+    }
+
+    function renderSleepLogs() {
+      const container = document.getElementById('sleepLogList');
+      if (appData.sleepData.length === 0) {
+        container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 12px;">No sleep entries.</div>`;
+        return;
+      }
+
+      let totalMin = 0, totalQuality = 0;
+      container.innerHTML = appData.sleepData.slice(0, 10).map(item => {
+        totalMin += item.durationMin;
+        totalQuality += item.quality;
+        return `
+          <div class="log-item">
+            <div class="log-info">
+              <span class="log-title">${item.date} (${item.bedtime} - ${item.wakeTime})</span>
+              <span class="log-sub">Quality: ${'★'.repeat(item.quality)}</span>
+            </div>
+            <div class="log-value">${formatMinutesToHHMM(item.durationMin)}</div>
+          </div>
+        `;
+      }).join('');
+
+      const count = Math.min(appData.sleepData.length, 10);
+      document.getElementById('sleepAvgWeekly').innerText = formatMinutesToHHMM(Math.round(totalMin / count));
+      document.getElementById('sleepQualityAvg').innerText = `${(totalQuality / count).toFixed(1)}★`;
+    }
+
+
+    // --- PERSONAL TIME LOGIC ---
+    function bindPersonalEvents() {
+      document.getElementById('personalDateInput').value = formatISODate(new Date());
+
+      document.getElementById('savePersonalBtn').addEventListener('click', () => {
+        recordStateSnapshot();
+        const category = document.getElementById('personalCatInput').value;
+        const durationMin = parseInt(document.getElementById('personalDurationInput').value, 10) || 0;
+        const date = document.getElementById('personalDateInput').value;
+        const notes = document.getElementById('personalNotesInput').value;
+
+        appData.personalData.unshift({ id: Date.now(), category, durationMin, date, notes });
+        saveStorage();
+        renderPersonalLogs();
+      });
+    }
+
+    function renderPersonalLogs() {
+      const container = document.getElementById('personalLogList');
+      if (appData.personalData.length === 0) {
+        container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 12px;">No personal entries.</div>`;
+        return;
+      }
+
+      let weeklyTotalMin = 0;
+      const catTotals = {};
+
+      container.innerHTML = appData.personalData.slice(0, 10).map(item => {
+        weeklyTotalMin += item.durationMin;
+        catTotals[item.category] = (catTotals[item.category] || 0) + item.durationMin;
+        return `
+          <div class="log-item">
+            <div class="log-info">
+              <span class="log-title">${item.category} - ${item.notes || 'Activity'}</span>
+              <span class="log-sub">${item.date}</span>
+            </div>
+            <div class="log-value">${formatMinutesToHHMM(item.durationMin)}</div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('personalTotalWeekly').innerText = formatMinutesToHHMM(weeklyTotalMin);
+      let topCat = 'None', maxCatMin = 0;
+      for (const [cat, min] of Object.entries(catTotals)) {
+        if (min > maxCatMin) { maxCatMin = min; topCat = cat; }
+      }
+      document.getElementById('personalTopCat').innerText = topCat;
+    }
+
+
+    // --- MONTHLY SUMMARY & FLEXOMETER ---
+    function renderMonthlySummary() {
+      let totalWorkedMin = 0, totalTheoreticalMin = 0;
+      const regime = appData.regimes[appData.currentRegime];
+
+      Object.values(appData.workData).forEach(wData => {
+        DAYS.forEach(day => {
+          const dObj = wData[day];
+          if (dObj) {
+            const worked = calculateDayWorkedMinutes(dObj);
+            totalWorkedMin += worked;
+            if (worked > 0) totalTheoreticalMin += regime.daily[day] || (appData.currentRegime === 'summer' ? 420 : 450);
+          }
+        });
+      });
+
+      const netFlexMin = totalWorkedMin - totalTheoreticalMin;
+      document.getElementById('monthlyTotalWorked').innerText = formatMinutesToHHMM(totalWorkedMin);
+      document.getElementById('monthlyActualTotal').innerText = formatMinutesToHHMM(totalWorkedMin) + 'h';
+      document.getElementById('monthlyTheoTarget').innerText = formatMinutesToHHMM(totalTheoreticalMin) + 'h';
+
+      const flexElem = document.getElementById('monthlyFlexBalance');
+      flexElem.innerText = formatMinutesToHHMM(netFlexMin, true);
+      flexElem.style.color = netFlexMin >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+
+      const target = totalTheoreticalMin || 1;
+      const pct = Math.min(100, Math.max(10, Math.round((totalWorkedMin / target) * 100)));
+      document.getElementById('flexMeterBar').style.width = `${pct}%`;
+    }
+
+
+    // --- BACKUP & CSV EXPORT ---
+    function bindBackupEvents() {
+      document.getElementById('downloadBackupBtn').addEventListener('click', () => {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
+        const anchor = document.createElement('a');
+        anchor.setAttribute("href", dataStr);
+        anchor.setAttribute("download", `TimeTracker_Backup_${formatISODate(new Date())}.json`);
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+      });
+
+      document.getElementById('downloadCSVBtn').addEventListener('click', () => {
+        let csvContent = "data:text/csv;charset=utf-8,Date,Day,Entry,LunchIn,LunchOut,Exit,WorkedHours\n";
+        Object.entries(appData.workData).forEach(([weekIso, wData]) => {
+          const mondayDate = new Date(weekIso);
+          DAYS.forEach((day, idx) => {
+            const dayDate = formatISODate(addDays(mondayDate, idx));
+            const d = wData[day] || {};
+            const worked = formatMinutesToHHMM(calculateDayWorkedMinutes(d));
+            csvContent += `${dayDate},${day},${d.entry||''},${d.lunchIn||''},${d.lunchOut||''},${d.exit||''},${worked}\n`;
+          });
+        });
+        const anchor = document.createElement('a');
+        anchor.setAttribute("href", encodeURI(csvContent));
+        anchor.setAttribute("download", `TimeTracker_Work_${formatISODate(new Date())}.csv`);
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+      });
+
+      document.getElementById('importFileInput').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          try {
+            recordStateSnapshot();
+            appData = { ...appData, ...JSON.parse(evt.target.result) };
+            saveStorage();
+            renderWeeklyGrid();
+            renderSleepLogs();
+            renderPersonalLogs();
+            alert('✅ Backup restored!');
+          } catch (err) { alert('❌ Error parsing JSON file.'); }
+        };
+        reader.readAsText(file);
+      });
+
+      document.getElementById('clearAllDataBtn').addEventListener('click', () => {
+        if (confirm('⚠️ Reset all data?')) {
+          recordStateSnapshot();
+          localStorage.removeItem(STORAGE_KEY);
+          location.reload();
+        }
+      });
+    }
+
+
+    // --- DIRECT CELL EDITING & CONTROLS ---
+    function bindCellEditing() {
+      DAYS.forEach(day => {
+        ['entry', 'lunchIn', 'lunchOut', 'exit'].forEach(field => {
+          const inputElem = document.getElementById(`cell-${day}-${field}`);
+          if (inputElem) {
+            inputElem.addEventListener('focus', (e) => {
+              e.target.select();
+            });
+
+            inputElem.addEventListener('change', (e) => {
+              recordStateSnapshot(); // Capture state before change
+              const weekData = getCurrentWeekData();
+              const val = e.target.value.trim();
+              if (val) {
+                const totalMin = parseTimeToMinutes(val);
+                const formatted12h = formatMinutesTo12H(totalMin);
+                weekData[day][field] = formatted12h || val;
+              } else {
+                weekData[day][field] = '';
+              }
+              saveStorage();
+              renderWeeklyGrid();
+            });
+          }
+        });
+      });
+
+      document.getElementById('regimeBadge').addEventListener('click', () => {
+        recordStateSnapshot();
+        appData.currentRegime = appData.currentRegime === 'summer' ? 'winter' : 'summer';
+        updateRegimeUI();
+        saveStorage();
+        renderWeeklyGrid();
+      });
+
+      document.getElementById('presetScheduleBtn').addEventListener('click', () => {
+        applyPresetSchedule();
+      });
+
+      document.getElementById('prevWeekBtn').addEventListener('click', () => {
+        appData.currentWeekDate = addDays(appData.currentWeekDate, -7);
+        saveStorage();
+        renderWeeklyGrid();
+      });
+
+      document.getElementById('nextWeekBtn').addEventListener('click', () => {
+        appData.currentWeekDate = addDays(appData.currentWeekDate, 7);
+        saveStorage();
+        renderWeeklyGrid();
+      });
+    }
+
+
+    // --- THEME & TAB NAVIGATION ---
+    function applyTheme(theme) {
+      appData.theme = theme;
+      document.documentElement.setAttribute('data-theme', theme);
+      document.getElementById('themeToggleBtn').innerText = theme === 'dark' ? '🌙' : '☀️';
+    }
+
+    function bindTabNavigation() {
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const tabId = item.dataset.tab;
+          document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+
+          item.classList.add('active');
+          document.getElementById(tabId).classList.add('active');
+        });
+      });
+
+      document.getElementById('themeToggleBtn').addEventListener('click', () => {
+        const nextTheme = appData.theme === 'dark' ? 'light' : 'dark';
+        applyTheme(nextTheme);
+        saveStorage();
+      });
+    }
+
+
+    // --- INITIALIZATION ---
+    window.addEventListener('DOMContentLoaded', () => {
+      loadStorage();
+      bindTabNavigation();
+      bindCellEditing();
+      bindKeyboardShortcuts();
+      bindSleepEvents();
+      bindPersonalEvents();
+      bindBackupEvents();
+
+      // Initial Renders
+      renderWeeklyGrid();
+      renderSleepLogs();
+      renderPersonalLogs();
+      updateUndoRedoButtons();
+    });
+  </script>
+</body>
+</html>
